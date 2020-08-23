@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Datacatcher</title>
+</head>
+<body>
+<form method="POST">
+    {% csrf_token %}
+    <input type="submit" value="Start catcher">
+</form>
+<br> <br>
+{% for record in records %}
+    <div>
+        {{record.time}} {{record.price}}
+    </div>
+{% endfor %}
+</body>
+</html>
