@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Datacatcher</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
+
+<br> <br>
 <form method="POST">
     {% csrf_token %}
     <input type="submit" value="Start catcher">
@@ -15,5 +13,5 @@
         {{record.time}} {{record.price}}
     </div>
 {% endfor %}
-</body>
-</html>
+
+{% endblock %}
