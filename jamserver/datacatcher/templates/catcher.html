@@ -1,17 +1,74 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/catcher.css' %}">
+{% endblock %}
 
 {% block content %}
 
-<br> <br>
-<form method="POST">
-    {% csrf_token %}
-    <input type="submit" value="Start catcher">
-</form>
-<br> <br>
-{% for record in records %}
-    <div>
-        {{record.time}} {{record.price}}
+
+<div class="container-fluid">
+    <br>
+    <div class="row">
+        <div class="col-4 left-menu">
+            <h3> Data collection log</h3>
+            <br>
+            <div class="row">
+                <div class="col-12 themed-grid-col header-col"> general info </div>
+                <div class="col-6 themed-grid-col"> database size</div>
+                <div class="col-6 themed-grid-col"> {{size}} lines</div>
+                {% if size > 0 %}
+                    <div class="col-6 themed-grid-col"> number of runs </div>
+                    <div class="col-6 themed-grid-col"> {{ latest.run_id }}</div>
+                    <div class="col-6 themed-grid-col"> last update </div>
+                    <div class="col-6 themed-grid-col"> {{ latest.time }}</div>
+                {% endif %}
+            </div>
+            <br>
+            {% if size > 2 %}
+            <div class="row">
+                <div class="col-12 themed-grid-col header-col"> last records </div>
+                <div class="col-6 themed-grid-col header-col"> time </div>
+                <div class="col-6 themed-grid-col header-col"> price </div>
+                {% for record in last %}
+                    <div class="col-6 themed-grid-col"> {{ record.time|date:'Y-m-d H:i:s' }} </div>
+                    <div class="col-6 themed-grid-col"> {{ record.price }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <br>
+            {% if active %}
+                <div class="row">
+                    <div class="col-12 themed-grid-col header-col"> Data catcher is active </div>
+                    <div class="col-6 themed-grid-col"> Start time</div>
+                    <div class="col-6 themed-grid-col"> {{start}} </div>
+                    <div class="col-6 themed-grid-col"> End time </div>
+                    <div class="col-6 themed-grid-col"> {{ end }}</div>
+                </div>
+
+                <div align="center">
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <input type="submit" class="btn-primary btn-lg btn" value="Stop catcher"/>
+                    </form>
+                </div>
+
+            {% else %}
+                <div class="row">
+                    <div class="col-12 themed-grid-col header-col"> Data catcher is inactive </div>
+                </div>
+
+                <div align="center">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="submit" class="btn-primary btn-lg btn" value="Start catcher"/>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
     </div>
-{% endfor %}
+</div>
 
 {% endblock %}
