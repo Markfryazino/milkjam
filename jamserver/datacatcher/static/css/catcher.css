@@ -1,0 +1,37 @@
+.themed-grid-col {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: rgba(153, 92, 0, .15);
+    border: 1px solid rgba(153, 92, 0, .2);
+    text-align: center;
+}
+
+.header-col {
+    background-color: rgba(153, 92, 0, .30);
+}
+
+.left-menu {
+    border: 2px solid rgba(153, 92, 0, .2);
+    padding-right: 40px;
+    padding-bottom: 30px;
+}
+
+
+h3 {
+    margin: 10px;
+    text-align: center;
+    color: #663300
+}
+
+.btn-primary {
+    margin: 10px;
+    background-color: rgba(153, 92, 0, .15);
+    color: black;
+    border-color: rgba(153, 92, 0, .5);
+}
+
+.btn-primary:hover {
+    color: white;
+    background-color: rgba(153, 92, 0, .8);
+    border-color: black
+}
