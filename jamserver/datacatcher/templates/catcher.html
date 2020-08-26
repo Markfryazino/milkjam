@@ -7,7 +7,6 @@
 
 {% block content %}
 
-
 <div class="container-fluid">
     <br>
     <div class="row">
@@ -17,7 +16,7 @@
             <div class="row">
                 <div class="col-12 themed-grid-col header-col"> general info </div>
                 <div class="col-6 themed-grid-col"> database size</div>
-                <div class="col-6 themed-grid-col"> {{size}} lines</div>
+                <div class="col-6 themed-grid-col"> {{size}} records</div>
                 {% if size > 0 %}
                     <div class="col-6 themed-grid-col"> number of runs </div>
                     <div class="col-6 themed-grid-col"> {{ latest.run_id }}</div>
@@ -67,6 +66,12 @@
                     </form>
                 </div>
             {% endif %}
+        </div>
+        <div class="col-8 plot">
+            <h3> Price chart of the latest run </h3>
+            {% autoescape off %}
+                {{ plot }}
+            {% endautoescape %}
         </div>
     </div>
 </div>

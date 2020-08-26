@@ -4,6 +4,7 @@
     background-color: rgba(153, 92, 0, .15);
     border: 1px solid rgba(153, 92, 0, .2);
     text-align: center;
+    border-collapse: collapse
 }
 
 .header-col {
@@ -14,6 +15,8 @@
     border: 2px solid rgba(153, 92, 0, .2);
     padding-right: 40px;
     padding-bottom: 30px;
+    border-collapse: collapse;
+
 }
 
 
@@ -34,4 +37,5 @@ h3 {
     color: white;
     background-color: rgba(153, 92, 0, .8);
     border-color: black
+    border-collapse: collapse
 }

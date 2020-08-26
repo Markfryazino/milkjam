@@ -5,17 +5,33 @@ import datetime
 from django.utils import timezone
 from .forms import TimeoutForm
 from threading import Timer
+from plotly.offline import plot
+import plotly.graph_objects as go
 
 start = timezone.now()
 timeout = 0
 catcher = None
 timer = None
 
-TIME = 12000
+TIME = 14400
 
 
 def zero():
     DataCatcher.active = 0
+
+
+def generate_plot():
+    run_id = Record.objects.latest('time').run_id
+    data = Record.objects.all().filter(run_id=run_id)
+
+    x = [el.time for el in data]
+    y = [el.price for el in data]
+
+    trace = go.Scatter(x=x, y=y, name='price', marker_color='#995c00')
+    layout = go.Layout(title="Price chart of the latest run")
+    fig = go.Figure(data=[trace], layout=layout)
+    plot_div = plot([trace], output_type='div', show_link=False, link_text="")
+    return plot_div
 
 
 def index(request):
@@ -51,4 +67,5 @@ def index(request):
                                                 "last": reversed(Record.objects.order_by('-id')[:3]),
                                                 "start": start,
                                                 "end": start + datetime.timedelta(seconds=timeout),
-                                                "active": DataCatcher.active})
+                                                "active": DataCatcher.active,
+                                                "plot": generate_plot()})
