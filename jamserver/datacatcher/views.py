@@ -21,7 +21,7 @@ def zero():
 
 
 def generate_plot():
-    run_id = Record.objects.latest('time').run_id
+    run_id = Record.objects.all().last().run_id
     data = Record.objects.all().filter(run_id=run_id)
 
     x = [el.time for el in data]
@@ -44,7 +44,7 @@ def index(request):
             timer.cancel()
         else:
             if Record.objects.all().exists():
-                run_id = Record.objects.latest('time').run_id + 1
+                run_id = Record.objects.all().last().run_id + 1
             else:
                 run_id = 1
 
@@ -63,7 +63,7 @@ def index(request):
                                                 "active": DataCatcher.active})
     else:
         return render(request, "catcher.html", {"size": Record.objects.count(),
-                                                "latest": Record.objects.latest('time'),
+                                                "latest": Record.objects.all().last(),
                                                 "last": reversed(Record.objects.order_by('-id')[:3]),
                                                 "start": start,
                                                 "end": start + datetime.timedelta(seconds=timeout),
