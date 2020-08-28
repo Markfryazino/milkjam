@@ -15,9 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from datacatcher import views
+from datacatcher import views as catcher
+from api import views as api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('catcher/', views.index)
+    path('catcher/', catcher.index),
+    path('api/v1/start-run', api.start_run)
 ]
