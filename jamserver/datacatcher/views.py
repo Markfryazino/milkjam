@@ -24,7 +24,7 @@ def generate_plot():
     run_id = Record.objects.all().last().run_id
     data = Record.objects.all().filter(run_id=run_id)
 
-    x = [el.time for el in data]
+    x = [el.timestamp for el in data]
     y = [el.price for el in data]
 
     trace = go.Scatter(x=x, y=y, name='price', marker_color='#995c00')

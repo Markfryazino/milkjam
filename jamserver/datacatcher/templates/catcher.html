@@ -21,17 +21,17 @@
                     <div class="col-6 themed-grid-col"> number of runs </div>
                     <div class="col-6 themed-grid-col"> {{ latest.run_id }}</div>
                     <div class="col-6 themed-grid-col"> last update </div>
-                    <div class="col-6 themed-grid-col"> {{ latest.time }}</div>
+                    <div class="col-6 themed-grid-col"> {{ latest.timestamp }}</div>
                 {% endif %}
             </div>
             <br>
             {% if size > 2 %}
             <div class="row">
                 <div class="col-12 themed-grid-col header-col"> last records </div>
-                <div class="col-6 themed-grid-col header-col"> time </div>
+                <div class="col-6 themed-grid-col header-col"> timestamp </div>
                 <div class="col-6 themed-grid-col header-col"> price </div>
                 {% for record in last %}
-                    <div class="col-6 themed-grid-col"> {{ record.time|date:'Y-m-d H:i:s' }} </div>
+                    <div class="col-6 themed-grid-col"> {{ record.timestamp|date:'Y-m-d H:i:s' }} </div>
                     <div class="col-6 themed-grid-col"> {{ record.price }}</div>
                 {% endfor %}
             </div>
@@ -40,9 +40,9 @@
             {% if active %}
                 <div class="row">
                     <div class="col-12 themed-grid-col header-col"> Data catcher is active </div>
-                    <div class="col-6 themed-grid-col"> Start time</div>
+                    <div class="col-6 themed-grid-col"> Start timestamp</div>
                     <div class="col-6 themed-grid-col"> {{start}} </div>
-                    <div class="col-6 themed-grid-col"> End time </div>
+                    <div class="col-6 themed-grid-col"> End timestamp </div>
                     <div class="col-6 themed-grid-col"> {{ end }}</div>
                 </div>
 
