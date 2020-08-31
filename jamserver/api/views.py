@@ -7,6 +7,7 @@ from django.forms.models import model_to_dict
 from datetime import datetime
 from django.core.serializers.json import DjangoJSONEncoder
 import json
+from tester.Emulator import StupidEmulator
 
 
 def get_name():
@@ -93,8 +94,10 @@ def get_snapshot(request):
 
             for id in range(last.record.id, now_record.id + 1):
                 record = Record.objects.get(id=id)
+                rates = {'btcusdt': record.price}
                 snapshot = Snapshot.objects.create(run=run, balances=last.balances,
-                                                   usd_balance=1.,  # TODO - do as it should be
+                                                   usd_balance=StupidEmulator.count_usdt(last.balances,
+                                                                                         rates),
                                                    timestamp=record.timestamp,
                                                    record=record)
             result = model_to_dict(snapshot)
@@ -103,3 +106,7 @@ def get_snapshot(request):
 
     else:
         return HttpResponse("Invalid method")
+
+
+def make_action(request):
+    pass
