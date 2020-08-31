@@ -61,7 +61,8 @@ def start_run(request):
         data['snapshot'] = Snapshot.objects.create(run=run, balances=last_balances,
                                                    usd_balance=run.start_balance,
                                                    timestamp=record.timestamp, record=record)
-        return HttpResponse(json.dumps({'run_id': run.id}, cls=DjangoJSONEncoder))
+        result = model_to_dict(run)
+        return HttpResponse(json.dumps(result, cls=DjangoJSONEncoder))
     else:
         return HttpResponse("Invalid method")
 
@@ -75,6 +76,7 @@ def get_snapshot(request):
         data['timestamp'] = datetime.fromisoformat(data['timestamp'])
 
         run = Run.objects.get(id=data['run_id'])
+
         if timezone.make_naive(Snapshot.objects.filter(run=run).last().timestamp) >= data['timestamp']:
             try:
                 snapshot = get_closest(Snapshot, data['timestamp'])
@@ -83,6 +85,8 @@ def get_snapshot(request):
             result = model_to_dict(snapshot)
             result['record'] = model_to_dict(snapshot.record)
             return HttpResponse(json.dumps(result, cls=DjangoJSONEncoder))
+        elif run.duration is not None:
+            return HttpResponse("This run is finished!")
         else:
             last = Snapshot.objects.filter(run=run).last()
 
@@ -115,6 +119,9 @@ def make_action(request):
 
         data['timestamp'] = datetime.fromisoformat(data['timestamp'])
         run = Run.objects.get(id=data['run_id'])
+        if run.duration is not None:
+            return HttpResponse("This run is finished!")
+
         query = eval(data['query'])
 
         if timezone.make_naive(Snapshot.objects.filter(run=run).last().timestamp) >= data['timestamp']:
@@ -157,3 +164,40 @@ def make_action(request):
 
     else:
         return HttpResponse('Invalid method')
+
+
+def end_run(request):
+    if request.method != 'GET':
+        return HttpResponse('Invalid method')
+
+    data = request.GET.dict()
+    if ('run_id' not in data) or ('timestamp' not in data):
+        return HttpResponse('Required parameters missing')
+
+    data['timestamp'] = datetime.fromisoformat(data['timestamp'])
+    run = Run.objects.get(id=data['run_id'])
+
+    try:
+        now_record = get_closest(Record, data['timestamp'])
+        if now_record.timestamp <= Snapshot.objects.filter(run=run).last().timestamp:
+            return HttpResponse("You are trying to change the past!")
+    except ValueError:
+        return HttpResponse("Bad times...")
+
+    last = Snapshot.objects.filter(run=run).last()
+    for id in range(last.record.id, now_record.id + 1):
+        record = Record.objects.get(id=id)
+        rates = {'btcusdt': record.price}
+        snapshot = Snapshot.objects.create(run=run, balances=eval(last.balances),
+                                           usd_balance=StupidEmulator.count_usdt(eval(last.balances),
+                                                                                 rates),
+                                           timestamp=record.timestamp,
+                                           record=record)
+
+    run.duration = snapshot.timestamp - run.start_time
+    run.end_balances = snapshot.balances
+    run.end_usdt = snapshot.usd_balance
+    run.save()
+
+    result = model_to_dict(run)
+    return HttpResponse(json.dumps(result, cls=DjangoJSONEncoder))

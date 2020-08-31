@@ -9,7 +9,9 @@ class Run(models.Model):
     start_time = models.DateTimeField()
     comment = models.TextField(default="no comments")
     start_balance = models.FloatField(default=200.)
-    duration = models.FloatField(null=True)
+    duration = models.DurationField(null=True)
+    end_balances = models.TextField(null=True)
+    end_usdt = models.FloatField(null=True)
 
 
 class Snapshot(models.Model):
