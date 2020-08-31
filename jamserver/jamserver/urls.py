@@ -22,5 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('catcher/', catcher.index),
     path('api/v1/start-run', api.start_run),
-    path('api/v1/get-snapshot', api.get_snapshot)
+    path('api/v1/get-snapshot', api.get_snapshot),
+    path('api/v1/make-action', api.make_action)
 ]

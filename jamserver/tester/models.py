@@ -18,3 +18,9 @@ class Snapshot(models.Model):
     usd_balance = models.FloatField(null=True)
     timestamp = models.DateTimeField()
     record = models.ForeignKey(Record, on_delete=models.CASCADE, null=True)
+
+
+class Action(models.Model):
+    snapshot = models.ForeignKey(Snapshot, on_delete=models.CASCADE)
+    query = models.TextField()
+    delta = models.TextField()
