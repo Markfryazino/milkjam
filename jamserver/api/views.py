@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest
-from tester.models import Run, Snapshot, run_fields
+from tester.models import Run, Snapshot, run_fields, Action
 from datacatcher.models import Record
 from django.utils import timezone
 from django.forms.models import model_to_dict
@@ -69,7 +69,6 @@ def start_run(request):
 def get_snapshot(request):
     if request.method == 'GET':
         data = request.GET.dict()
-        print(data)
         if ('timestamp' not in data) or ('run_id' not in data):
             return HttpResponse("Required parameters missing")
 
@@ -96,7 +95,7 @@ def get_snapshot(request):
                 record = Record.objects.get(id=id)
                 rates = {'btcusdt': record.price}
                 snapshot = Snapshot.objects.create(run=run, balances=last.balances,
-                                                   usd_balance=StupidEmulator.count_usdt(last.balances,
+                                                   usd_balance=StupidEmulator.count_usdt(eval(last.balances),
                                                                                          rates),
                                                    timestamp=record.timestamp,
                                                    record=record)
@@ -109,4 +108,52 @@ def get_snapshot(request):
 
 
 def make_action(request):
-    pass
+    if request.method == 'GET':
+        data = request.GET.dict()
+        if ('timestamp' not in data) or ('query' not in data) or ('run_id' not in data):
+            return HttpResponse("Required parameters missing")
+
+        data['timestamp'] = datetime.fromisoformat(data['timestamp'])
+        run = Run.objects.get(id=data['run_id'])
+        query = eval(data['query'])
+
+        if timezone.make_naive(Snapshot.objects.filter(run=run).last().timestamp) >= data['timestamp']:
+            return HttpResponse("You are trying to change the past!")
+
+        for key in query:
+            if key not in StupidEmulator.pairs:
+                return HttpResponse(f"Invalid pair {key}")
+
+        last = Snapshot.objects.filter(run=run).last()
+
+        try:
+            now_record = get_closest(Record, data['timestamp'])
+            if now_record.timestamp <= Snapshot.objects.filter(run=run).last().timestamp:
+                return HttpResponse("You are trying to change the past!")
+        except ValueError:
+            return HttpResponse("Bad times...")
+
+        for id in range(last.record.id, now_record.id):
+            record = Record.objects.get(id=id)
+            rates = {'btcusdt': record.price}
+            snapshot = Snapshot.objects.create(run=run, balances=eval(last.balances),
+                                               usd_balance=StupidEmulator.count_usdt(eval(last.balances),
+                                                                                     rates),
+                                               timestamp=record.timestamp,
+                                               record=record)
+
+        rates = {'btcusdt': now_record.price}
+        delta, new_balance = StupidEmulator.make_order(eval(last.balances), query, rates)
+        snapshot = Snapshot.objects.create(run=run, balances=new_balance,
+                                           usd_balance=StupidEmulator.count_usdt(new_balance,
+                                                                                 rates),
+                                           timestamp=now_record.timestamp,
+                                           record=now_record)
+        action = Action.objects.create(snapshot=snapshot, query=str(query), delta=str(delta))
+        result = model_to_dict(action)
+        result['snapshot'] = model_to_dict(action.snapshot)
+        result['snapshot']['record'] = model_to_dict(action.snapshot.record)
+        return HttpResponse(json.dumps(result, cls=DjangoJSONEncoder))
+
+    else:
+        return HttpResponse('Invalid method')
