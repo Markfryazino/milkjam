@@ -8,6 +8,7 @@ from datetime import datetime
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from tester.Emulator import StupidEmulator
+import traceback
 
 
 def get_name():
@@ -15,6 +16,16 @@ def get_name():
         return f"Untitled {Run.objects.all().last().id + 1}"
     else:
         return "Untitled 1"
+
+
+def return_error(func):
+    def wrapper(request):
+        try:
+            return func(request)
+        except:
+            tb = traceback.format_exc()
+            return HttpResponse(status=500, content=tb)
+    return wrapper
 
 
 def get_closest(obj, time, window=3):
@@ -39,6 +50,7 @@ def get_closest(obj, time, window=3):
         return best
 
 
+@return_error
 def start_run(request):
     if request.method == 'GET':
         data = request.GET.dict()
@@ -54,7 +66,7 @@ def start_run(request):
         try:
             record = get_closest(Record, data['start_time'])
         except ValueError:
-            return HttpResponse("Bad times...")
+            raise SystemError("Bad times...")
 
         run = Run.objects.create(**data)
         last_balances = str({'usdt': run.start_balance})
@@ -64,14 +76,15 @@ def start_run(request):
         result = model_to_dict(run)
         return HttpResponse(json.dumps(result, cls=DjangoJSONEncoder))
     else:
-        return HttpResponse("Invalid method")
+        raise SystemError("Invalid method")
 
 
+@return_error
 def get_snapshot(request):
     if request.method == 'GET':
         data = request.GET.dict()
         if ('timestamp' not in data) or ('run_id' not in data):
-            return HttpResponse("Required parameters missing")
+            raise SystemError("Required parameters missing")
 
         data['timestamp'] = datetime.fromisoformat(data['timestamp'])
 
@@ -81,19 +94,19 @@ def get_snapshot(request):
             try:
                 snapshot = get_closest(Snapshot, data['timestamp'])
             except ValueError:
-                return HttpResponse("Bad times...")
+                raise SystemError("Bad times...")
             result = model_to_dict(snapshot)
             result['record'] = model_to_dict(snapshot.record)
             return HttpResponse(json.dumps(result, cls=DjangoJSONEncoder))
         elif run.duration is not None:
-            return HttpResponse("This run is finished!")
+            raise SystemError("This run is finished!")
         else:
             last = Snapshot.objects.filter(run=run).last()
 
             try:
                 now_record = get_closest(Record, data['timestamp'])
             except ValueError:
-                return HttpResponse("Bad times...")
+                raise SystemError("Bad times...")
 
             for id in range(last.record.id, now_record.id + 1):
                 record = Record.objects.get(id=id)
@@ -108,37 +121,38 @@ def get_snapshot(request):
             return HttpResponse(json.dumps(result, cls=DjangoJSONEncoder))
 
     else:
-        return HttpResponse("Invalid method")
+        raise SystemError("Invalid method")
 
 
+@return_error
 def make_action(request):
     if request.method == 'GET':
         data = request.GET.dict()
         if ('timestamp' not in data) or ('query' not in data) or ('run_id' not in data):
-            return HttpResponse("Required parameters missing")
+            raise SystemError("Required parameters missing")
 
         data['timestamp'] = datetime.fromisoformat(data['timestamp'])
         run = Run.objects.get(id=data['run_id'])
         if run.duration is not None:
-            return HttpResponse("This run is finished!")
+            raise SystemError("This run is finished!")
 
         query = eval(data['query'])
 
         if timezone.make_naive(Snapshot.objects.filter(run=run).last().timestamp) >= data['timestamp']:
-            return HttpResponse("You are trying to change the past!")
+            raise SystemError("You are trying to change the past!")
 
         for key in query:
             if key not in StupidEmulator.pairs:
-                return HttpResponse(f"Invalid pair {key}")
+                raise SystemError(f"Invalid pair {key}")
 
         last = Snapshot.objects.filter(run=run).last()
 
         try:
             now_record = get_closest(Record, data['timestamp'])
             if now_record.timestamp <= Snapshot.objects.filter(run=run).last().timestamp:
-                return HttpResponse("You are trying to change the past!")
+                raise SystemError("You are trying to change the past!")
         except ValueError:
-            return HttpResponse("Bad times...")
+            raise SystemError("Bad times...")
 
         for id in range(last.record.id, now_record.id):
             record = Record.objects.get(id=id)
@@ -163,16 +177,17 @@ def make_action(request):
         return HttpResponse(json.dumps(result, cls=DjangoJSONEncoder))
 
     else:
-        return HttpResponse('Invalid method')
+        raise SystemError('Invalid method')
 
 
+@return_error
 def end_run(request):
     if request.method != 'GET':
-        return HttpResponse('Invalid method')
+        raise SystemError('Invalid method')
 
     data = request.GET.dict()
     if ('run_id' not in data) or ('timestamp' not in data):
-        return HttpResponse('Required parameters missing')
+        raise SystemError('Required parameters missing')
 
     data['timestamp'] = datetime.fromisoformat(data['timestamp'])
     run = Run.objects.get(id=data['run_id'])
@@ -180,9 +195,9 @@ def end_run(request):
     try:
         now_record = get_closest(Record, data['timestamp'])
         if now_record.timestamp <= Snapshot.objects.filter(run=run).last().timestamp:
-            return HttpResponse("You are trying to change the past!")
+            raise SystemError("You are trying to change the past!")
     except ValueError:
-        return HttpResponse("Bad times...")
+        raise SystemError("Bad times...")
 
     last = Snapshot.objects.filter(run=run).last()
     for id in range(last.record.id, now_record.id + 1):
