@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-<title> {run_name} </title>
+<title> {{ run.name }} </title>
 {% endblock %}
 
 {% block styles %}
@@ -11,6 +11,53 @@
 
 {% block content %}
 
-
+<div class="container-fluid">
+    <br>
+    <div class="row">
+        <div class="col-4 left-menu">
+            <h3> {{ run.name }} </h3>
+            <p>
+                {% if active %} Run is active.
+                {% else %} Run is finished.
+                {% endif %}
+            </p>
+            <br>
+            <div class="row">
+                <div class="col-12 themed-grid-col header-col"> run info </div>
+                <div class="col-6 themed-grid-col"> start time </div>
+                <div class="col-6 themed-grid-col"> {{ run.start_time }} </div>
+                <div class="col-6 themed-grid-col"> start balance </div>
+                <div class="col-6 themed-grid-col"> usdt {{ run.start_balance }} </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-12 themed-grid-col header-col"> results </div>
+                <div class="col-6 themed-grid-col"> duration </div>
+                <div class="col-6 themed-grid-col"> {{ duration }} </div>
+                <div class="col-6 themed-grid-col"> final balance </div>
+                <div class="col-6 themed-grid-col"> usdt {{ end_usdt }} </div>
+                <div class="col-6 themed-grid-col"> delta balance </div>
+                <div class="col-6 themed-grid-col"> usdt {{ delta_balance }}</div>
+                <div class="col-6 themed-grid-col"> delta % </div>
+                <div class="col-6 themed-grid-col"> {{ percent_delta }} % </div>
+                <div class="col-6 themed-grid-col"> number of actions </div>
+                <div class="col-6 themed-grid-col"> {{ num_actions }}</div>
+            </div>
+        </div>
+        <div class="col-8 plot">
+            <h3> Some useful charts </h3>
+            {% autoescape off %}
+                {{ usdt_plot }}
+            {% endautoescape %}
+            {% autoescape off %}
+                {{ price_plot }}
+            {% endautoescape %}
+            <br>
+            {% autoescape off %}
+                {{ balances_plot }}
+            {% endautoescape %}
+        </div>
+    </div>
+</div>
 
 {% endblock %}
