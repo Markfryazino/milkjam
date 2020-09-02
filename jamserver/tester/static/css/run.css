@@ -22,7 +22,7 @@
 h3 {
     margin: 10px;
     text-align: center;
-    color: #663300
+    color: #663300;
 }
 
 .btn-primary {
@@ -41,4 +41,8 @@ h3 {
 
 .inside {
     padding: 15px;
+}
+
+p {
+    text-align: center;
 }
