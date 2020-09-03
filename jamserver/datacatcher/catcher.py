@@ -25,7 +25,8 @@ class DataCatcher:
             return
 
         price = (float(query['data']['asks'][0][0]) + float(query['data']['bids'][0][0])) / 2
-        record = Record.objects.create(price=price, run_id=run)
+        record = Record.objects.create(price=price, run_id=run, asks=str(query['data']['asks']),
+                                       bids=str(query['data']['bids']))
 
     def __init__(self, run_id, timeout=600):
         self.manager = multiprocessing.Manager()
