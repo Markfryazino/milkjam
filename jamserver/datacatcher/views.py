@@ -13,7 +13,7 @@ timeout = 0
 catcher = None
 timer = None
 
-TIME = 14400
+TIME = 3600 * 24 * 5
 
 
 def zero():
