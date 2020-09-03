@@ -35,11 +35,11 @@
                 <div class="col-6 themed-grid-col"> duration </div>
                 <div class="col-6 themed-grid-col"> {{ duration }} </div>
                 <div class="col-6 themed-grid-col"> final balance </div>
-                <div class="col-6 themed-grid-col"> usdt {{ end_usdt }} </div>
+                <div class="col-6 themed-grid-col"> usdt {{ end_usdt|stringformat:".5f" }} </div>
                 <div class="col-6 themed-grid-col"> delta balance </div>
-                <div class="col-6 themed-grid-col"> usdt {{ delta_balance }}</div>
+                <div class="col-6 themed-grid-col"> usdt {{ delta_balance|stringformat:".5f" }}</div>
                 <div class="col-6 themed-grid-col"> delta % </div>
-                <div class="col-6 themed-grid-col"> {{ percent_delta }} % </div>
+                <div class="col-6 themed-grid-col"> {{ percent_delta|stringformat:".5f" }} % </div>
                 <div class="col-6 themed-grid-col"> number of actions </div>
                 <div class="col-6 themed-grid-col"> {{ num_actions }}</div>
             </div>

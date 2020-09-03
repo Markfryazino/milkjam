@@ -2,7 +2,9 @@ from django.shortcuts import render
 from plotly.offline import plot
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from urllib.parse import parse_qs
 from .models import Run, Snapshot, Action
+from django.http import HttpResponse
 
 
 def handle_active(run, params):
@@ -84,8 +86,18 @@ def balances_plot(data):
 
 
 def index(request):
+    qs = parse_qs(request.META['QUERY_STRING'])
+    try:
+        if 'id' in qs:
+            run = Run.objects.get(id=int(qs['id'][0]))
+        elif 'name' in qs:
+            run = Run.objects.get(name=qs['name'][0])
+        else:
+            run = Run.objects.last()
+    except:
+        return HttpResponse(status=500, content="Something went wrong with your run")
+
     runs = Run.objects.all()
-    run = Run.objects.last()
 
     actions = Action.objects.filter(snapshot__run=run)
     snapshots = Snapshot.objects.filter(run=run)
