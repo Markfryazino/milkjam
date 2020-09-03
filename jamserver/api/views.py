@@ -200,7 +200,7 @@ def end_run(request):
         raise SystemError("Bad times...")
 
     last = Snapshot.objects.filter(run=run).last()
-    for id in range(last.record.id, now_record.id + 1):
+    for id in range(last.record.id, now_record.id):
         record = Record.objects.get(id=id)
         rates = {'btcusdt': record.price}
         snapshot = Snapshot.objects.create(run=run, balances=eval(last.balances),
@@ -208,6 +208,18 @@ def end_run(request):
                                                                                  rates),
                                            timestamp=record.timestamp,
                                            record=record)
+
+    rates = {'btcusdt': now_record.price}
+    query = {'btcusdt': -eval(last.balances)['btc']}
+    delta, new_balance = StupidEmulator.make_order(eval(last.balances),
+                                                   query, rates)
+    snapshot = Snapshot.objects.create(run=run, balances=new_balance,
+                                       usd_balance=StupidEmulator.count_usdt(new_balance,
+                                                                             rates),
+                                       timestamp=now_record.timestamp,
+                                       record=now_record)
+
+    action = Action.objects.create(snapshot=snapshot, query=str(query), delta=str(delta))
 
     run.duration = snapshot.timestamp - run.start_time
     run.end_balances = snapshot.balances
