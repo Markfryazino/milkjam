@@ -138,8 +138,8 @@ def make_action(request):
 
         query = eval(data['query'])
 
-        if timezone.make_naive(Snapshot.objects.filter(run=run).last().timestamp) >= data['timestamp']:
-            raise SystemError("You are trying to change the past!")
+        #  if timezone.make_naive(Snapshot.objects.filter(run=run).last().timestamp) > data['timestamp']:
+        #    raise SystemError("You are trying to change the past!")
 
         for key in query:
             if key not in StupidEmulator.pairs:
@@ -149,7 +149,7 @@ def make_action(request):
 
         try:
             now_record = get_closest(Record, data['timestamp'])
-            if now_record.timestamp <= Snapshot.objects.filter(run=run).last().timestamp:
+            if now_record.timestamp < Snapshot.objects.filter(run=run).last().timestamp:
                 raise SystemError("You are trying to change the past!")
         except ValueError:
             raise SystemError("Bad times...")
@@ -194,7 +194,7 @@ def end_run(request):
 
     try:
         now_record = get_closest(Record, data['timestamp'])
-        if now_record.timestamp <= Snapshot.objects.filter(run=run).last().timestamp:
+        if now_record.timestamp < Snapshot.objects.filter(run=run).last().timestamp:
             raise SystemError("You are trying to change the past!")
     except ValueError:
         raise SystemError("Bad times...")

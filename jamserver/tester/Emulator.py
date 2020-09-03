@@ -19,12 +19,14 @@ class StupidEmulator:
     def make_order(balances, query, rates):
         delta = defaultdict(float)
         for key, val in query.items():
-            mod = int(val > 0)
-            delta[key[:3]] += val * mod
-            delta[key[3:]] -= val * rates[key] * (1. + StupidEmulator.fee) * mod
+            delta[key[:3]] += val
+            delta[key[3:]] -= val * rates[key] * (1. + StupidEmulator.fee)
 
         for key, val in delta.items():
             if key not in balances:
                 balances[key] = 0.
             balances[key] += val
+
+        print(query, delta)
+
         return delta, balances
